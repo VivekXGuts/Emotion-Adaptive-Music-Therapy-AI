@@ -1,0 +1,24 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+backend/server_log.txt
+backend/music_output/
+music_output/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/build/
+frontend/frontend_log.txt
+.npm
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Models (optional to ignore, but usually large)
+# backend/models/*.json
+# models/*.json

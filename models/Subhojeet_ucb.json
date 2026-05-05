@@ -1,0 +1,21 @@
+{
+  "counts": {
+    "facial": 3,
+    "voice": 0,
+    "text": 0,
+    "rppg": 0
+  },
+  "rewards": {
+    "facial": 1.5,
+    "voice": 0.0,
+    "text": 0.0,
+    "rppg": 0.0
+  },
+  "total_steps": 3,
+  "base": {
+    "facial": 0.3,
+    "voice": 0.3,
+    "text": 0.2,
+    "rppg": 0.2
+  }
+}
