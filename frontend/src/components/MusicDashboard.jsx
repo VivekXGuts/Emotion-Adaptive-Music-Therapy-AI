@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Music, Play, FastForward, CheckCircle, Volume2, Info } from 'lucide-react';
+import { Music, Play, FastForward, CheckCircle } from 'lucide-react';
 
 // Emotion to Spotify Playlist Mapping
 const SPOTIFY_PLAYLISTS = {

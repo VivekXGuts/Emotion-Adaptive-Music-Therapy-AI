@@ -153,7 +153,7 @@ class MusicTherapyEngine:
             user_id=user_id, current_emotion=current_emotion,
             target_emotion=target_info[2], guide_duration_s=guide_duration_s
         )
-        print(f"[therapy] Session: {current_emotion} → {target_info[2]}")
+        print(f"[therapy] Session: {current_emotion} -> {target_info[2]}")
         return self._session
 
     def get_current_params(self, v, a, label):

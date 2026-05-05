@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import threading
+import base64
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -18,6 +19,16 @@ app = Flask(__name__)
 CORS(app)
 
 MOCK_MODE = os.environ.get("EAMTA_MOCK", "false").lower() == "true"
+START_HARDWARE = os.environ.get("EAMTA_START_HARDWARE", "false").lower() == "true"
+
+try:
+    import cv2
+    import numpy as np
+    CV2_AVAILABLE = True
+except ImportError:
+    cv2 = None
+    np = None
+    CV2_AVAILABLE = False
 
 facial  = FacialEmotionDetector(mock_mode=MOCK_MODE)
 rppg    = RPPGDetector(fps=30, mock_mode=MOCK_MODE)
@@ -59,7 +70,17 @@ def _update_fusion():
             "links": p.links,
         }
 
-import cv2
+def _decode_image(data_url):
+    if not data_url or not CV2_AVAILABLE:
+        return None
+    try:
+        _, encoded = data_url.split(",", 1) if "," in data_url else ("", data_url)
+        image_bytes = base64.b64decode(encoded)
+        image_array = np.frombuffer(image_bytes, dtype=np.uint8)
+        return cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+    except Exception as exc:
+        print(f"[facial decode error] {exc}")
+        return None
 
 def _hardware_loop():
     if MOCK_MODE:
@@ -75,10 +96,14 @@ def _hardware_loop():
                 print(f"[rppg mock] {e}")
             time.sleep(1)
 
+    if not CV2_AVAILABLE:
+        print("[EAMTA] OpenCV not installed; hardware loop disabled.")
+        return
+
     print("[EAMTA] Requesting webcam access...")
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("[EAMTA Error] Could not open webcam! Please check Mac permissions.")
+        print("[EAMTA Error] Could not open webcam. Check camera permissions.")
         return
 
     frame_count = 0
@@ -115,7 +140,8 @@ def _hardware_loop():
         frame_count += 1
         time.sleep(1/30.0)
 
-threading.Thread(target=_hardware_loop, daemon=True).start()
+if START_HARDWARE:
+    threading.Thread(target=_hardware_loop, daemon=True).start()
 
 @app.route("/api/health")
 def health():
@@ -140,7 +166,9 @@ def analyze_text():
 
 @app.route("/api/analyze/facial", methods=["POST"])
 def analyze_facial():
-    result = facial.run_once()
+    data = request.get_json(silent=True) or {}
+    frame = _decode_image(data.get("image"))
+    result = facial.analyze_frame(frame) if frame is not None else facial.run_once()
     with _lock:
         fusion.add_reading(ModalityReading(
             "facial", result["valence"], result["arousal"], 0.85))
@@ -208,6 +236,8 @@ def music_params():
         return jsonify(_state.get("latest_music") or {})
 
 if __name__ == "__main__":
-    print(f"\n[EAMTA] Starting server — mock_mode={MOCK_MODE}")
+    if not START_HARDWARE:
+        threading.Thread(target=_hardware_loop, daemon=True).start()
+    print(f"\n[EAMTA] Starting server - mock_mode={MOCK_MODE}")
     print("[EAMTA] Open http://localhost:5001/api/health to verify\n")
     app.run(debug=True, port=5001, threaded=True)

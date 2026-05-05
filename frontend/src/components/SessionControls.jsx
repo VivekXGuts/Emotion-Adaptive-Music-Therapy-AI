@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../Constants';
 import { Play, Square, Mic, MicOff, Heart, Camera } from 'lucide-react';
@@ -137,7 +137,7 @@ const SessionControls = ({ onStatusUpdate, sessionActive, onEmotionDetected, onS
   };
 
   // Capture frame and send to backend
-  const captureAndAnalyzeFace = async () => {
+  const captureAndAnalyzeFace = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;
     const canvas = canvasRef.current;
     canvas.width = videoRef.current.videoWidth;
@@ -151,7 +151,7 @@ const SessionControls = ({ onStatusUpdate, sessionActive, onEmotionDetected, onS
     } catch (err) {
       console.error('Face analysis error:', err);
     }
-  };
+  }, [onStatusUpdate]);
 
   // Voice recognition
   const startListening = (phase = 'mood') => {
@@ -288,7 +288,7 @@ const SessionControls = ({ onStatusUpdate, sessionActive, onEmotionDetected, onS
     if (!sessionActive || !isCameraOn) return;
     const interval = setInterval(captureAndAnalyzeFace, 5000);
     return () => clearInterval(interval);
-  }, [sessionActive, isCameraOn]);
+  }, [sessionActive, isCameraOn, captureAndAnalyzeFace]);
 
   return (
     <div style={{ padding: '20px', background: '#252526', color: '#fff', borderRadius: '12px' }}>

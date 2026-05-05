@@ -7,7 +7,7 @@ import LiveStats from './components/LiveStats';
 import MusicDashboard from './components/MusicDashboard';
 import SessionControls from './components/SessionControls';
 
-import { Activity, ShieldCheck, Zap } from 'lucide-react';
+import { Activity, Zap } from 'lucide-react';
 
 function App() {
   const [fusedState, setFusedState] = useState(null);
@@ -15,12 +15,9 @@ function App() {
   const [session, setSession] = useState({ active: false });
   const [rppg, setRppg] = useState({ bpm: null });
   const [customVideoId, setCustomVideoId] = useState(null);
-  const [healthInfo, setHealthInfo] = useState({ mock_mode: false });
-
   const fetchHealth = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/health`);
-      setHealthInfo(res.data);
+      await axios.get(`${API_BASE_URL}/health`);
     } catch (err) {
       console.error("Fetch Health Error:", err);
     }

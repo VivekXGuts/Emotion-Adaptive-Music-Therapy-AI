@@ -45,7 +45,7 @@ class TextEmotionDetector:
             )
             print("[text] Model ready.")
         except Exception as e:
-            print(f"[text] Model load failed: {e} — using keywords.")
+            print(f"[text] Model load failed: {e} - using keywords.")
             self._model = None
 
     def _keyword_inference(self, text):
@@ -100,4 +100,4 @@ if __name__ == "__main__":
     d = TextEmotionDetector(use_transformer=False)
     tests = ["I feel amazing today!", "I am so angry", "feeling sad and lonely"]
     for t in tests:
-        print(f"'{t}' → {d.analyze_text(t)}")
+        print(f"'{t}' -> {d.analyze_text(t)}")

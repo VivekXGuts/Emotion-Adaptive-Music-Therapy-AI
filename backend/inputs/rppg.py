@@ -1,7 +1,12 @@
 import numpy as np
 from collections import deque
-from scipy.signal import butter, filtfilt
 from typing import Optional
+
+try:
+    from scipy.signal import butter, filtfilt
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
 
 FPS_DEFAULT = 30
 WINDOW_SECONDS = 10
@@ -24,6 +29,8 @@ class RPPGDetector:
         return Xs - alpha * Ys
 
     def _bandpass(self, signal):
+        if not SCIPY_AVAILABLE:
+            return signal - np.mean(signal)
         nyq = self.fps / 2.0
         low = max(0.01, (BPM_MIN / 60.0) / nyq)
         high = min(0.99, (BPM_MAX / 60.0) / nyq)
